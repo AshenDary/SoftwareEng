@@ -1,0 +1,55 @@
+.dashboard-page {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.kpi-card {
+  border: 2px solid #000;
+  background: #fff;
+  color: #000;
+  padding: 1rem;
+}
+
+.kpi-card p {
+  margin: 0 0 0.75rem;
+  font-weight: 800;
+}
+
+.kpi-card strong {
+  display: block;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.chart-panel {
+  border: 2px solid #000;
+  padding: 1rem;
+  background: #fff;
+}
+
+.chart-panel h2 {
+  margin: 0 0 1rem;
+}
+
+.chart-frame {
+  width: 100%;
+  min-height: 320px;
+}
+
+@media (max-width: 960px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+}

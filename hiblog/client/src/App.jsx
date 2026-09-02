@@ -1,34 +1,59 @@
 import { useState } from 'react'
-import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import './App.css'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
+import { BLOGS } from './components/config/Constants.jsx'
 import Header from './components/navbar/Header.jsx'
 import Footer from './components/navbar/Footer.jsx'
-import Home from './components/pages/Home.jsx'
+import Sidebar from './components/navbar/Sidebar.jsx'
 import About from './components/pages/About.jsx'
 import Contact from './components/pages/Contact.jsx'
+import Dashboard from './components/pages/Dashboard.jsx'
+import BlogList from './components/pages/BlogList.jsx'
 import Login from './components/pages/Login.jsx'
+import Profile from './components/pages/Profile.jsx'
 import ViewBlog from './pages/ViewBlog.jsx'
+
+function AuthenticatedLayout({ onLogout }) {
+  return (
+    <div className="dashboard-layout">
+      <Sidebar onLogout={onLogout} />
+      <main className="dashboard-content">
+        <Outlet />
+      </main>
+    </div>
+  )
+}
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [blogs, setBlogs] = useState(BLOGS)
   const onLogout = () => setIsLoggedIn(false)
 
   return (
     <BrowserRouter>
       <div className="app-shell">
-        <Header isLoggedIn={isLoggedIn} onLogout={onLogout} />
-        <main className="main-content">
-          <Routes>
-            <Route path="/" element={<ProtectedRoute isLoggedIn={isLoggedIn}><Home /></ProtectedRoute>} />
-            <Route path="/about" element={<ProtectedRoute isLoggedIn={isLoggedIn}><About /></ProtectedRoute>} />
-            <Route path="/contact" element={<ProtectedRoute isLoggedIn={isLoggedIn}><Contact /></ProtectedRoute>} />
-            <Route path="/blog/:id" element={<ProtectedRoute isLoggedIn={isLoggedIn}><ViewBlog /></ProtectedRoute>} />
-            <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
-            <Route path="*" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
-          </Routes>
-        </main>
-        <Footer />
+        {!isLoggedIn && <Header isLoggedIn={isLoggedIn} onLogout={onLogout} />}
+        <Routes>
+          <Route path="/login" element={<main className="main-content"><Login setIsLoggedIn={setIsLoggedIn} /></main>} />
+          <Route
+            element={(
+              <ProtectedRoute isLoggedIn={isLoggedIn}>
+                <AuthenticatedLayout onLogout={onLogout} />
+              </ProtectedRoute>
+            )}
+          >
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<Dashboard blogs={blogs} />} />
+            <Route path="/blogs" element={<BlogList blogs={blogs} setBlogs={setBlogs} />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/blog/:id" element={<ViewBlog blogs={blogs} />} />
+          </Route>
+          <Route path="*" element={<Navigate to={isLoggedIn ? '/dashboard' : '/login'} replace />} />
+        </Routes>
+        {!isLoggedIn && <Footer />}
       </div>
     </BrowserRouter>
   )

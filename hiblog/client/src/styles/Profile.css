@@ -1,0 +1,44 @@
+.profile-page {
+  max-width: 760px;
+}
+
+.profile-card {
+  border: 2px solid #000;
+  background: #fff;
+  color: #000;
+  padding: 1rem;
+}
+
+.profile-card dl {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+}
+
+.profile-card div {
+  display: grid;
+  grid-template-columns: 160px minmax(0, 1fr);
+  gap: 1rem;
+  border-bottom: 2px solid #000;
+  padding-bottom: 1rem;
+}
+
+.profile-card div:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.profile-card dt {
+  font-weight: 900;
+}
+
+.profile-card dd {
+  margin: 0;
+}
+
+@media (max-width: 560px) {
+  .profile-card div {
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+}

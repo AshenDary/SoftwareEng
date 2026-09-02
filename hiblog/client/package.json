@@ -13,11 +13,12 @@
     "@vitejs/plugin-react": "latest",
     "react": "latest",
     "react-dom": "latest",
-    "react-router-dom": "latest"
+    "react-router-dom": "latest",
+    "recharts": "^3.10.1"
   },
   "devDependencies": {
-    "eslint": "latest",
     "@eslint/js": "latest",
+    "eslint": "latest",
     "eslint-plugin-react-hooks": "latest",
     "eslint-plugin-react-refresh": "latest",
     "globals": "latest",
