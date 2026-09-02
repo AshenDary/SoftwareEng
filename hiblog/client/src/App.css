@@ -1,0 +1,1 @@
+#root { min-height: 100vh; }.app-shell { min-height: 100vh; display: flex; flex-direction: column; }.main-content { width: min(1100px, calc(100% - 2rem)); margin: 2rem auto; flex: 1; }.page-card { background: #fff; border: 2px solid #000; padding: clamp(1.5rem, 4vw, 3rem); }

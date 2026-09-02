@@ -1,0 +1,2 @@
+function About() { return <section className="page-card"><p className="eyebrow">About the blog</p><h1>A place to document the journey</h1><p>My React Blog shares approachable lessons, project reflections, and ideas from the path of becoming a more thoughtful developer.</p><p>It is designed as a welcoming space for students and curious builders to learn alongside one another.</p></section> }
+export default About
