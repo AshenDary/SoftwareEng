@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/profile';
+const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/profile`;
 
 const getAuthHeader = () => ({
   headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
