@@ -2,14 +2,14 @@ import { useState } from 'react'
 import { BrowserRouter, Navigate, Outlet, Route, Routes } from 'react-router-dom'
 import './App.css'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
-import { BLOGS } from './components/config/Constants.jsx'
+
 import Header from './components/navbar/Header.jsx'
 import Footer from './components/navbar/Footer.jsx'
 import Sidebar from './components/navbar/Sidebar.jsx'
 import About from './components/pages/About.jsx'
 import Contact from './components/pages/Contact.jsx'
 import Dashboard from './components/pages/Dashboard.jsx'
-import BlogList from './components/pages/BlogList.jsx'
+import BlogsPage from './components/pages/BlogsPage.jsx'
 import Login from './components/pages/Login.jsx'
 import Profile from './components/pages/Profile.jsx'
 import ViewBlog from './pages/ViewBlog.jsx'
@@ -27,7 +27,7 @@ function AuthenticatedLayout({ onLogout }) {
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [blogs, setBlogs] = useState(BLOGS)
+
   const onLogout = () => setIsLoggedIn(false)
 
   return (
@@ -44,12 +44,12 @@ function App() {
             )}
           >
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard" element={<Dashboard blogs={blogs} />} />
-            <Route path="/blogs" element={<BlogList blogs={blogs} setBlogs={setBlogs} />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/blogs" element={<BlogsPage />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/blog/:id" element={<ViewBlog blogs={blogs} />} />
+            <Route path="/blog/:id" element={<ViewBlog />} />
           </Route>
           <Route path="*" element={<Navigate to={isLoggedIn ? '/dashboard' : '/login'} replace />} />
         </Routes>
