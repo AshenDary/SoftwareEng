@@ -9,7 +9,7 @@ import Sidebar from './components/navbar/Sidebar.jsx'
 import About from './components/pages/About.jsx'
 import Contact from './components/pages/Contact.jsx'
 import Dashboard from './components/pages/Dashboard.jsx'
-import BlogList from './components/pages/BlogList.jsx'
+import BlogsPage from './components/pages/BlogsPage.jsx'
 import Login from './components/pages/Login.jsx'
 import Profile from './components/pages/Profile.jsx'
 import ViewBlog from './pages/ViewBlog.jsx'
@@ -45,7 +45,7 @@ function App() {
           >
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/blogs" element={<BlogList />} />
+            <Route path="/blogs" element={<BlogsPage />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
