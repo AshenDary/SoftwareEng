@@ -1,22 +1,35 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
+import { useState, useEffect } from 'react'
+import { getStatistics } from '../../services/statisticsService.jsx'
 import '../../styles/Dashboard.css'
 
-function Dashboard({ blogs }) {
-  const totals = blogs.reduce(
-    (summary, blog) => ({
-      views: summary.views + blog.views,
-      likes: summary.likes + blog.likes,
-      comments: summary.comments + blog.comments.length,
-    }),
-    { views: 0, likes: 0, comments: 0 },
-  )
+function Dashboard() {
+  const [stats, setStats] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-  const chartData = blogs.map((blog) => ({ title: blog.title, views: blog.views }))
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const data = await getStatistics()
+        setStats(data)
+      } catch (err) {
+        setError('Failed to load statistics')
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchStats()
+  }, [])
+
+  if (loading) return <section className="page-card dashboard-page"><div className="spinner">Loading Dashboard...</div></section>
+  if (error) return <section className="page-card dashboard-page"><p className="error-message">{error}</p></section>
+
   const kpis = [
-    { label: 'View Counts', value: totals.views },
-    { label: 'Number of Likes', value: totals.likes },
-    { label: 'Number of Comments', value: totals.comments },
-    { label: 'Total Blogs', value: blogs.length },
+    { label: 'View Counts', value: stats.totalViews },
+    { label: 'Number of Likes', value: stats.totalLikes },
+    { label: 'Number of Comments', value: stats.totalComments },
+    { label: 'Total Blogs', value: stats.totalArticles },
   ]
 
   return (
@@ -37,7 +50,7 @@ function Dashboard({ blogs }) {
         <h2>Views Per Blog</h2>
         <div className="chart-frame">
           <ResponsiveContainer width="100%" height={320}>
-            <BarChart data={chartData} margin={{ top: 16, right: 16, bottom: 72, left: 8 }}>
+            <BarChart data={stats.articleStats} margin={{ top: 16, right: 16, bottom: 72, left: 8 }}>
               <CartesianGrid stroke="#000" strokeDasharray="0" vertical={false} />
               <XAxis dataKey="title" stroke="#000" tick={{ fill: '#000', fontSize: 12 }} angle={-30} textAnchor="end" interval={0} height={90} />
               <YAxis stroke="#000" tick={{ fill: '#000', fontSize: 12 }} />

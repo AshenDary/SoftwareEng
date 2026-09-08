@@ -1,17 +1,35 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { getArticles, createArticle, updateArticle, deleteArticle } from '../../services/articleService.jsx'
 import BlogFormModal from '../modal/BlogFormModal.jsx'
 import ConfirmPopUp from '../modal/ConfirmPopUp.jsx'
 import CommentsList from './CommentsList.jsx'
 import '../../styles/BlogList.css'
 
-function BlogList({ blogs, setBlogs }) {
+function BlogList() {
   const [search, setSearch] = useState('')
   const [category, setCategory] = useState('')
   const [selectedBlogId, setSelectedBlogId] = useState(null)
   const [editingBlog, setEditingBlog] = useState(null)
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState(null)
+  
+  const [blogs, setBlogs] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  const fetchBlogs = async () => {
+    try {
+      const data = await getArticles()
+      setBlogs(data)
+    } catch (err) {
+      setError('Failed to load articles')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => { fetchBlogs() }, [])
 
   const categories = useMemo(() => [...new Set(blogs.map((blog) => blog.category))], [blogs])
   const filteredBlogs = blogs.filter((blog) => {
@@ -21,8 +39,13 @@ function BlogList({ blogs, setBlogs }) {
     return matchesSearch && matchesCategory
   })
 
-  const handleLike = (blogId) => {
-    setBlogs((currentBlogs) => currentBlogs.map((blog) => (blog.id === blogId ? { ...blog, likes: blog.likes + 1 } : blog)))
+  const handleLike = async (blog) => {
+    try {
+      await updateArticle(blog._id, { likes: blog.likes + 1 })
+      fetchBlogs()
+    } catch (err) {
+      console.error(err)
+    }
   }
 
   const handleOpenCreate = () => {
@@ -30,26 +53,27 @@ function BlogList({ blogs, setBlogs }) {
     setIsFormOpen(true)
   }
 
-  const handleSubmitBlog = (form) => {
-    if (editingBlog) {
-      setBlogs((currentBlogs) => currentBlogs.map((blog) => (blog.id === editingBlog.id ? { ...blog, title: form.title, category: form.category, excerpt: form.description.slice(0, 110), content: form.description } : blog)))
-    } else {
-      const nextBlog = {
-        id: Date.now(),
-        title: form.title,
-        author: 'Jared L. Noel',
-        date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
-        category: form.category,
-        excerpt: form.description.slice(0, 110),
-        content: form.description,
-        views: 0,
-        likes: 0,
-        comments: [],
+  const handleSubmitBlog = async (form) => {
+    try {
+      if (editingBlog) {
+        await updateArticle(editingBlog._id, { title: form.title, category: form.category, excerpt: form.description.slice(0, 110), content: form.description })
+      } else {
+        const nextBlog = {
+          title: form.title,
+          author: 'Jared L. Noel',
+          date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+          category: form.category,
+          excerpt: form.description.slice(0, 110),
+          content: form.description,
+        }
+        await createArticle(nextBlog)
       }
-      setBlogs((currentBlogs) => [nextBlog, ...currentBlogs])
+      fetchBlogs()
+      setEditingBlog(null)
+      setIsFormOpen(false)
+    } catch (err) {
+      console.error(err)
     }
-    setEditingBlog(null)
-    setIsFormOpen(false)
   }
 
   const handleEdit = (blog) => {
@@ -57,11 +81,19 @@ function BlogList({ blogs, setBlogs }) {
     setIsFormOpen(true)
   }
 
-  const handleConfirmDelete = () => {
-    setBlogs((currentBlogs) => currentBlogs.filter((blog) => blog.id !== deleteTarget.id))
-    if (selectedBlogId === deleteTarget.id) setSelectedBlogId(null)
-    setDeleteTarget(null)
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteArticle(deleteTarget._id)
+      if (selectedBlogId === deleteTarget._id) setSelectedBlogId(null)
+      setDeleteTarget(null)
+      fetchBlogs()
+    } catch (err) {
+      console.error(err)
+    }
   }
+
+  if (loading) return <section className="page-card blog-list-page"><div className="spinner">Loading Blogs...</div></section>
+  if (error) return <section className="page-card blog-list-page"><p className="error-message">{error}</p></section>
 
   return (
     <section className="page-card blog-list-page">
@@ -90,20 +122,20 @@ function BlogList({ blogs, setBlogs }) {
 
       <div className="managed-blog-list">
         {filteredBlogs.map((blog) => (
-          <article className="managed-blog-card" key={blog.id}>
+          <article className="managed-blog-card" key={blog._id}>
             <div>
               <p className="blog-category">{blog.category}</p>
               <h2>{blog.title}</h2>
               <p className="blog-meta">By {blog.author} · {blog.date}</p>
               <p>{blog.excerpt}</p>
-              <p className="blog-stats">{blog.views} views · {blog.likes} likes · {blog.comments.length} comments</p>
+              <p className="blog-stats">{blog.views} views · {blog.likes} likes</p>
             </div>
             <div className="blog-actions">
-              <button type="button" className="button-primary" onClick={() => handleLike(blog.id)}>Like</button>
-              <button type="button" className="button-secondary" onClick={() => setSelectedBlogId(selectedBlogId === blog.id ? null : blog.id)}>View Comments</button>
+              <button type="button" className="button-primary" onClick={() => handleLike(blog)}>Like</button>
+              <button type="button" className="button-secondary" onClick={() => setSelectedBlogId(selectedBlogId === blog._id ? null : blog._id)}>View Comments</button>
               <button type="button" className="button-secondary" onClick={() => handleEdit(blog)}>Edit</button>
               <button type="button" className="button-secondary" onClick={() => setDeleteTarget(blog)}>Delete</button>
-              <Link className="button-link" to={`/blog/${blog.id}`}>Open</Link>
+              <Link className="button-link" to={`/blog/${blog._id}`}>Open</Link>
             </div>
           </article>
         ))}
@@ -112,7 +144,7 @@ function BlogList({ blogs, setBlogs }) {
       {!filteredBlogs.length && <p className="no-results">No blogs match your filters.</p>}
       <CommentsList selectedBlogId={selectedBlogId} blogs={blogs} />
 
-      {isFormOpen && <BlogFormModal key={editingBlog?.id || 'create'} initialBlog={editingBlog} onSubmit={handleSubmitBlog} onCancel={() => setIsFormOpen(false)} />}
+      {isFormOpen && <BlogFormModal key={editingBlog?._id || 'create'} initialBlog={editingBlog} onSubmit={handleSubmitBlog} onCancel={() => setIsFormOpen(false)} />}
       {deleteTarget && (
         <ConfirmPopUp
           title="Delete blog?"
